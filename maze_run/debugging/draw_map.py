@@ -1,33 +1,34 @@
 
 from pygame import image, Rect, Surface
+from load_tiles import load_tiles
 
 SIZE = 32
 
-tile_image = image.load('tiles.xpm')
+def parse_map(data):
+    return [list(row) for row in data.strip().split('\n')]
 
-tiles = {
-    '#': Rect(0, 0, 32, 32),
-    ' ': Rect(0, 32, 32, 64),
-    '*': Rect(0, 96, 32, 128),
-    }
-
-mapdata = """
+level = parse_map("""
 #######
-#     #
-#     #
-# *   #
-#     #
-#     #
-#######""".strip().split('\n')
+#.....#
+#.....#
+#.*...#
+#.....#
+#....x#
+#######""")
 
-def draw_map(data, tiles, img):
+
+def draw_map(data, img, tiles):
+    """Returns an image of a tile-based map"""
     xs = len(data[0]) * SIZE
     ys = len(data) * SIZE
-    m = Surface((xs, ys))
+    map_img = Surface((xs, ys))
     for y, row in enumerate(data):
         for x, char in enumerate(row):
-            m.blit(img, Rect((x*SIZE, y*SIZE, 0,0)), tiles[char])
-    return m
+            map_img.blit(img, Rect((x*SIZE, y*SIZE, 0, 0)), tiles[char])
+    return map_img
 
-m = draw_map(mapdata, tiles, tile_image)
-image.save(m, 'map.png')
+
+if __name__ == '__main__':
+    tile_img, tiles = load_tiles()
+    m = draw_map(level, tile_img, tiles)
+    image.save(m, 'map.png')

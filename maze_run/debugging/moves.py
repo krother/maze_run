@@ -2,13 +2,8 @@
 from load_tiles import load_tiles
 from draw_map import draw_map, level
 import pygame
-from pygame import image, Rect
+from pygame import image
 import sys
-
-
-pygame.init()
-pygame.display.set_mode((640, 400))
-display = pygame.display.get_surface()
 
 
 def get_player_pos(level, player_char='*'):
@@ -39,8 +34,7 @@ def move(level, direction):
 
 if __name__ == '__main__':
     tile_img, tiles = load_tiles()
-    mm = MAP_DATA
     for direction in ['RIGHT', 'RIGHT', 'UP', 'UP', 'LEFT']:
-        move(mm, direction)
-    img = draw_map(mm, tile_img, tiles)
+        move(level, direction)
+    img = draw_map(level, tile_img, tiles)
     image.save(img, 'moved.png')

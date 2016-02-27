@@ -1,10 +1,10 @@
-
-from event_loop import event_loop
-from load_tiles import load_tiles
-from draw_map import draw_map, level
-from moves import move
 import pygame
 from pygame import Rect
+
+from draw_map import draw_map, level
+from event_loop import event_loop
+from load_tiles import load_tiles
+from moves import move
 
 
 pygame.init()

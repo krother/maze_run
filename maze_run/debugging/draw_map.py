@@ -1,8 +1,6 @@
 
 from pygame import image, Rect, Surface
-from load_tiles import load_tiles
-
-SIZE = 32
+from load_tiles import load_tiles, SIZE
 
 def parse_map(data):
     return [list(row) for row in data.strip().split('\n')]

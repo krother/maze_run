@@ -1,19 +1,14 @@
 
 from pygame import image, Rect, Surface
 from load_tiles import load_tiles, SIZE
+from generate_maze import create_maze
 
 def parse_map(data):
     return [list(row) for row in data.strip().split('\n')]
 
-level = parse_map("""
-#######
-#.....#
-#.....#
-#.*...#
-#.....#
-#....x#
-#######""")
-
+level = parse_map(create_maze(12, 7))
+level[1][1] = '*'
+level[5][10] = 'x'
 
 def draw_map(data, img, tiles):
     """Returns an image of a tile-based map"""

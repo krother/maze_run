@@ -22,13 +22,13 @@ def game(key):
     """Handles key events in the game"""
     move(level, DIRECTIONS.get(key, 0))
     map_img = draw_map(level, tile_img, tiles)
-    display.blit(map_img, Rect((0, 0, 224, 224)), Rect((0, 0, 224, 224)))
+    display.blit(map_img, Rect((0, 0, 384, 224)), Rect((0, 0, 384, 224)))
     pygame.display.update()
 
 
 if __name__ == '__main__':
     tile_img, tiles = load_tiles()
     map_img = draw_map(level, tile_img, tiles)
-    display.blit(map_img, Rect((0, 0, 224, 224)), Rect((0, 0, 224, 224)))
+    display.blit(map_img, Rect((0, 0, 384, 224)), Rect((0, 0, 384, 224)))
     pygame.display.update()
     event_loop(game)

@@ -1,10 +1,13 @@
 
 from load_tiles import load_tiles
 from draw_map import draw_map, level
-import pygame
 from pygame import image
 import sys
 
+LEFT = (-1, 0)
+RIGHT = (1, 0)
+UP = (0, -1)
+DOWN = (0, 1)
 
 def get_player_pos(level, player_char='*'):
     """Returns a (x, y) tuple of player char on the level"""
@@ -13,18 +16,12 @@ def get_player_pos(level, player_char='*'):
             if char == player_char:
                 return x, y
 
+
 def move(level, direction):
     """Handles moves on the level"""
     oldx, oldy = get_player_pos(level)
-    newx, newy = oldx, oldy
-    if direction == 'LEFT':
-        newx = newx - 1
-    if direction == 'RIGHT':
-        newx = newx + 1
-    if direction == 'UP':
-        newy = newy - 1
-    if direction == 'DOWN':
-        newy = newy + 1
+    newx = oldx + direction[0]
+    newy = oldy + direction[1]
     if level[newy][newx] == 'x':
         sys.exit(0)
     if level[newy][newx] != '#':
@@ -34,7 +31,11 @@ def move(level, direction):
 
 if __name__ == '__main__':
     tile_img, tiles = load_tiles()
-    for direction in ['RIGHT', 'RIGHT', 'UP', 'UP', 'LEFT']:
+    maze = generate_maze.create_maze(12, 7)
+    maze = draw_map.parse_map(maze)
+    maze[1][1] = '*'
+    for i in range(100):
+        direction = random.choice([LEFT, RIGHT, UP, DOWN])
         move(level, direction)
-    img = draw_map(level, tile_img, tiles)
+    img = draw_map(maze, tile_img, tiles)
     image.save(img, 'moved.png')

@@ -4,15 +4,14 @@ from pygame import image, Rect, Surface
 TILE_POSITIONS = [
     ('#', 0, 0), # wall
     (' ', 0, 1), # floor
-    ('.', 0, 2), # dot
-    ('*', 0, 3), # player
-    ('x', 1, 1), # exit
-]
+    ('.', 2, 0), # dot
+    ('*', 3, 0), # player
+    ]
 SIZE = 32
 
 def get_tile_rect(x, y):
     """Converts tile indices to a pygame.Rect"""
-    return Rect(x*SIZE, y*SIZE, (x+1)*SIZE, (y+1)*SIZE)
+    return Rect(x*SIZE, y*SIZE, SIZE, SIZE)
 
 def load_tiles():
     """Returns a tuple of (image, tile_dict)"""

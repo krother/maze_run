@@ -1,27 +1,30 @@
-
+"""
+Draws grids as Pygame images
+"""
 from pygame import image, Rect, Surface
-from load_tiles import load_tiles, SIZE
+from load_tiles import load_tiles, get_tile_rect, SIZE
 from generate_maze import create_maze
+from util import debug_print
 
-def parse_map(data):
-    return [list(row) for row in data.strip().split('\n')]
+def parse_grid(data):
+    """Parses the string representation into a nested list"""
+    return [list(row) for row in data.strip().split("\n")]
 
-level = parse_map(create_maze(12, 7))
-level[1][1] = '*'
-level[5][10] = 'x'
+level = parse_grid(create_maze(12, 7))
 
-def draw_map(data, img, tiles):
-    """Returns an image of a tile-based map"""
-    xs = len(data[0]) * SIZE
-    ys = len(data) * SIZE
-    map_img = Surface((xs, ys))
+def draw_grid(data, tile_img, tiles):
+    """Returns an image of a tile-based grid"""
+    debug_print("drawing level", data)
+    xsize = len(data[0]) * SIZE
+    ysize = len(data) * SIZE
+    img = Surface((xsize, ysize))
     for y, row in enumerate(data):
         for x, char in enumerate(row):
-            map_img.blit(img, Rect((x*SIZE, y*SIZE, 0, 0)), tiles[char])
-    return map_img
-
+            rect = get_tile_rect(x, y)
+            img.blit(tile_img, rect, tiles[char])
+    return img
 
 if __name__ == '__main__':
     tile_img, tiles = load_tiles()
-    m = draw_map(level, tile_img, tiles)
-    image.save(m, 'map.png')
+    maze = draw_grid(level, tile_img, tiles)
+    image.save(maze, 'maze.png')

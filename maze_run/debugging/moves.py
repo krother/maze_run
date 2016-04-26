@@ -1,8 +1,10 @@
 
+from generate_maze import create_maze
 from load_tiles import load_tiles
-from draw_map import draw_map, level
+from draw_map import draw_grid, parse_grid
 from pygame import image
 import sys
+import random
 
 LEFT = (-1, 0)
 RIGHT = (1, 0)
@@ -31,11 +33,11 @@ def move(level, direction):
 
 if __name__ == '__main__':
     tile_img, tiles = load_tiles()
-    maze = generate_maze.create_maze(12, 7)
-    maze = draw_map.parse_map(maze)
+    maze =create_maze(12, 7)
+    maze = parse_grid(maze)
     maze[1][1] = '*'
     for i in range(100):
         direction = random.choice([LEFT, RIGHT, UP, DOWN])
-        move(level, direction)
-    img = draw_map(maze, tile_img, tiles)
+        move(maze, direction)
+    img = draw_grid(maze, tile_img, tiles)
     image.save(img, 'moved.png')

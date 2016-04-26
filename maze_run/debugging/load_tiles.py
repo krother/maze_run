@@ -4,6 +4,7 @@ from pygame import image, Rect, Surface
 TILE_POSITIONS = [
     ('#', 0, 0), # wall
     (' ', 0, 1), # floor
+    ('x', 1, 1), # exit
     ('.', 2, 0), # dot
     ('*', 3, 0), # player
     ]

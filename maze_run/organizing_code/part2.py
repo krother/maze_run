@@ -1,65 +1,5 @@
-"""
-Part II - Organizing Code
 
-Goal: Implement 8 features (1 per chapter)
-
-* smooth movement
-* scripted moves -> replay
-* collect fruit
-* count score
-* score display
-* two-player mode (problem remove global maze variable in move)
-
-
-New Features:
-1.) load tile info from JSON file
-    rewrote load_tiles
-    added file name constants
-    added dynamic path
-
-2.) key repeat
-    modified event loop
-    added key repeat constant
-    used pygame.time
-    discuss: not reinvent the wheel, e.g. countdown timer.
-    bad example: write your own countdown
-    discuss: using countdown timer versus absolute value
-    LATER: refactor to add event listener
-    LATER: refactor to map event types to functions from config file
-
-3.) Extended event loop
-    exit handled via event loop
-    exit function
-    draw() function
-    draw() function called throught timer event
-
-4.) Refactored maze MazeGenerator
-    created class with static methods
-
-5.) Refactored position vectors
-    using namedtuple
-
-6.) Randomly moving ghost 
-    problem: refactor move to be more general
-    problem: find_tile more general
-    problem: new event type
-    problem: exit when ghost meets player
-    later: ghost eats dots
-
-7.) Created TileGrid class
-    added __init__
-    added private attribute
-    added properties
-    added iterator
-    added __getitem__, __setitem__
-    TODO add __repr__
-
-8.) load level from text file
-    load_level function
-
-9.) added command-line arguments
-    TODO: fix and check all
-"""
+# TODO: fix and check all command-line arguments
 
 from util import debug_print
 from pygame import image, Rect, Surface
@@ -70,7 +10,24 @@ import random
 import json
 import os
 from collections import namedtuple
+from functools import partial
 import argparse
+import logging
+
+#logging.basicConfig(filename='random_levels.log', level=logging.INFO)
+
+log = logging.getLogger('moves')
+log.addHandler(logging.FileHandler('moves.log', mode='w'))
+log.setLevel(logging.INFO)
+
+eventlog = logging.getLogger('events')
+eventlog.addHandler(logging.StreamHandler(sys.stderr))
+#fmt='%(asctime)s %(message)s'
+#eventlog.addFormatter(logging.Formatter(fmt), datefmt='%m/%d/%Y %I:%M:%S %p')
+eventlog.setLevel(logging.WARNING)
+
+
+Position = namedtuple("Position", ["x", "y"])
 
 # ------------ CONSTANTS ----------------
 
@@ -79,11 +36,9 @@ CONFIG_PATH = os.path.split(__file__)[0]
 TILE_POSITION_FILE = CONFIG_PATH + 'tiles.json'
 TILE_IMAGE_FILE = CONFIG_PATH + '../images/tiles.xpm'
 
-LEVEL_FILE = 'level.txt'
-
 SIZE = 32
+SPEED = 4
 
-Position = namedtuple("Position", ["x", "y"])
 
 LEFT = Position(-1, 0)
 RIGHT = Position(1, 0)
@@ -96,19 +51,11 @@ DIRECTIONS = {
 }
 
 KEY_REPEAT_TIME = 250
-KEY_REPEATED = USEREVENT + 1
-
 DRAW_REPEAT_TIME = 100
-DRAW = USEREVENT + 2
+UPDATE_REPEAT_TIME = 20
+MOVE_GHOST_TIME = 250
 
-UPDATE = USEREVENT + 3
-UPDATE_REPEAT_TIME = 100
-
-MOVE_GHOST = USEREVENT + 4
-MOVE_GHOST_TIME = 500
-
-EXIT = USEREVENT + 5
-
+KEY_REPEATED, DRAW, UPDATE, MOVE_GHOST, EXIT = range(USEREVENT + 1, USEREVENT + 6)
 # ------------- LOADING TILES -----------
 
 def get_tile_rect(pos):
@@ -130,7 +77,8 @@ def load_tiles(json_fn):
 # ------------- GENERATING MAZES ------------
 
 class MazeGenerator:
-
+    """Generates two-dimensional mazes consisting of walls and dots."""
+    
     @staticmethod
     def create_grid_string(dots, xsize, ysize):
         grid = ""
@@ -180,6 +128,9 @@ class TileGrid:
     def __init__(self, data):
         self._grid = self.parse_grid(data)
 
+    def __repr__(self):
+        return "\n".join(["".join(row) for row in self._grid])
+
     def parse_grid(self, data):
         """Parses the string representation into a nested list"""
         return [list(row) for row in data.strip().split("\n")]
@@ -226,127 +177,163 @@ class TileGrid:
 
 # ------------- SPRITES --------------
 
-Sprite = namedtuple("Sprite", ['tile', 'pos'])
+class Sprite:
 
-sprites = {}
+    def __init__(self, maze, tile, startpos):
+        self.maze = maze
+        self.tile = tile
+        self.pos = startpos
+        self.anim_direction = None
+        self.anim_offset = Position(0, 0)
 
-def move(level, direction, actor="player"):
-    """Handles moves on the level"""
-    old = sprites[actor].pos
-    # avoids problem with finding: if '*' on map it might not be there
-    new = Position(old.x + direction.x, old.y + direction.y)
-    if level[new] in [" ", ".", "x"]:
-        sprites[actor] = Sprite(sprites[actor].tile, new)
-        check_collision()
-        if actor == 'player':
-            # this if should appear only once!
-            player_arrives_on_new_tile(level)
+    def move(self, direction):
+        """Handles moves on a level"""
+        if not self.is_moving():
+            old = self.pos
+            new = Position(old.x + direction.x, old.y + direction.y)
+            if self.maze[new] in [" ", ".", "x"]:
+                self.pos = new
+                self.anim_direction = direction
+                self.anim_offset = Position(-direction.x * SIZE, -direction.y * SIZE)
 
-def player_arrives_on_new_tile(level):
-    pos = sprites['player'].pos
-    tile = level[pos]
-    if tile == '.':
-        level[pos] = ' ' # eats dot
-    elif tile == 'x':
-        exit_game()
+    def is_moving(self):
+        return self.anim_direction
 
-def draw_sprites(img, tile_img, tiles):
-    """Returns an image of a tile-based grid"""
-    for sprite in sprites.values():
-        rect = get_tile_rect(sprite.pos)
-        img.blit(tile_img, rect, tiles[sprite.tile])
+    def arrives_on_new_tile(self):
+        pass
+
+    def draw(self, img, tile_img, tiles):
+        """Returns an image of a tile-based grid"""
+        rect = get_tile_rect(self.pos)
+        rect = Rect([rect.x + self.anim_offset.x, rect.y + self.anim_offset.y, rect.w, rect.h])
+        img.blit(tile_img, rect, tiles[self.tile])
+
+    def animate(self):
+        if self.anim_direction:
+            ofs_x = self.anim_offset.x + self.anim_direction.x * SPEED
+            ofs_y = self.anim_offset.y + self.anim_direction.y * SPEED
+            self.anim_offset = Position(ofs_x, ofs_y)
+            if ofs_x == 0 and ofs_y == 0:
+                self.arrives_on_new_tile()
+                self.anim_direction = None
+
+
+class Ghost(Sprite):
+
+    def random_move(self, event):
+        direction = random.choice([LEFT, RIGHT, UP, DOWN])
+        self.move(direction)
+
+
+class Player(Sprite):
+            
+    def arrives_on_new_tile(self):
+        tile = self.maze[self.pos]
+        if tile == '.':
+            self.maze[self.pos] = ' ' # eats dot
+        elif tile == 'x':
+            exit_game()
+
+    def handle_key(self, key):
+        """Handles key events in the game"""
+        direction = DIRECTIONS.get(key)
+        if direction:
+            self.move(direction)
+
+
+
 
 # ------------- EVENT LOOP --------------
 
-def event_loop(handle_key, delay=10, repeat=KEY_REPEAT_TIME):
+def event_loop(callbacks, delay=10, repeat=KEY_REPEAT_TIME):
     """Processes events and updates callbacks."""
     repeat_key = None
     running = True
     while running:
         pygame.event.pump()
         event = pygame.event.poll()
-        if event.type == KEYDOWN:
-            handle_key(event.key)
-            repeat_key = event.key
-            pygame.time.set_timer(KEY_REPEATED, KEY_REPEAT_TIME)
-        elif event.type == KEYUP:
-            if event.key == repeat_key:
-                repeat_key = None
-                pygame.time.set_timer(KEY_REPEATED, 0)
-        elif event.type == KEY_REPEATED:
-            handle_key(repeat_key)
-        elif event.type == DRAW:
-            draw()
-        elif event.type == UPDATE:
-            update()
-        elif event.type == MOVE_GHOST:
-            move_ghost()
+        action = callbacks.get(event.type)
+        if action:
+            action(event)
         elif event.type == EXIT:
             running = False
+            eventlog.critical('exit event received: ' + str(event))
+        else:
+            eventlog.info('unhandled event: ' + str(event))
         pygame.time.delay(delay)
 
 # ------------- GAME MECHANICS --------------
-
-def move_ghost():
-    direction = random.choice([LEFT, RIGHT, UP, DOWN])
-    move(maze, direction, "ghost")
-
-def check_collision():
-    if sprites['player'].pos == sprites['ghost'].pos:
-        # much better than: if level[new] in ["*", "g"]:
-        exit_game()
-
-def animate():
-    pass
 
 def exit_game():
     eve = pygame.event.Event(EXIT)
     pygame.event.post(eve)
     
-def update():
-    """Manages recurring checks in the game"""
-    check_collision() # redundant at the moment
-    animate()
 
 # ------------- MAIN GAME --------------
 
-def load_level(fn):
-    data = open(fn).read()
-    maze = TileGrid(data)
-    return maze
 
-def draw():
-    img = maze.draw_grid(tile_img, tiles)
-    draw_sprites(img, tile_img, tiles)
-    rect = Rect((0, 0, maze.xsize*SIZE, maze.ysize*SIZE))
-    display.blit(img, rect, rect)
-    pygame.display.update()
-    
-def game(key):
-    """Handles key events in the game"""
-    direction = DIRECTIONS.get(key)
-    if direction:
-        move(maze, direction, "player") # more explicit than '*'
-    # design flaw: uses global variables 'display', tile_img', 'tiles'
+class MazeRun:
 
-def create_random_maze(size):
-    maze_data = MazeGenerator.create_maze(size)
-    maze = TileGrid(maze_data)
-    maze[Position(size.x-2, size.y-2)] = 'x'
-    return maze
+    def create_display(self):
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+        self.display = pygame.display.get_surface()
 
-def create_sprites(size):
-    sprites = {
-        'player': Sprite('*', Position(1, 1)),
-        'ghost': Sprite('g', Position(size.x-2, 1))
+    def create_tiles(self):
+        self.tile_img = image.load(TILE_IMAGE_FILE)
+        self.tiles = load_tiles(TILE_POSITION_FILE)
+
+    def load_level(self, fn):
+        data = open(fn).read()
+        self.maze = TileGrid(data)
+            
+    def create_random_maze(self, size):
+        maze_data = MazeGenerator.create_maze(size)
+        self.maze = TileGrid(maze_data)
+        self.maze[Position(size.x-2, size.y-2)] = 'x'
+        log.info("random level created\n" + str(self.maze))
+
+    def create_sprites(self, size):
+        self.player = Player(self.maze, '*', Position(1, 1))
+        self.ghost = Ghost(self.maze, 'g', Position(size.x-2, 1))
+
+    def draw(self, event):
+        img = self.maze.draw_grid(self.tile_img, self.tiles)
+        self.player.draw(img, self.tile_img, self.tiles)
+        self.ghost.draw(img, self.tile_img, self.tiles)
+        rect = Rect((0, 0, self.maze.xsize*SIZE, self.maze.ysize*SIZE))
+        self.display.blit(img, rect, rect)
+        pygame.display.update()
+
+    def handle_key(self, event):
+        """Handles key events in the game"""
+        direction = DIRECTIONS.get(event.key)
+        if direction:
+            self.player.move(direction)
+            self.check_collision()
+
+    def check_collision(self):
+        if self.player.pos == self.ghost.pos:
+            exit_game()
+
+    def update(self, event):
+        """Manages recurring checks in the game"""
+        self.check_collision()
+        self.player.animate()
+        self.ghost.animate()
+
+    def start_game(self):
+        callbacks = {
+            KEYDOWN: self.handle_key,
+            DRAW: self.draw,
+            UPDATE: self.update,
+            MOVE_GHOST: self.ghost.random_move
         }
-    return sprites
+        pygame.time.set_timer(DRAW, DRAW_REPEAT_TIME)
+        pygame.time.set_timer(UPDATE, UPDATE_REPEAT_TIME)
+        pygame.time.set_timer(MOVE_GHOST, MOVE_GHOST_TIME)
+        event_loop(callbacks)
 
-def create_display():
-    pygame.init()
-    pygame.display.set_mode((800, 600))
-    display = pygame.display.get_surface()
-    return display
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Start the MazeRun game.')
@@ -385,13 +372,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     size = Position(args.x, args.y)
 
-    display = create_display()
-    maze = create_random_maze(size)
-    #maze = load_level(LEVEL_FILE)
-    sprites = create_sprites(size)
-    tile_img = image.load(TILE_IMAGE_FILE)
-    tiles = load_tiles(TILE_POSITION_FILE)
-    pygame.time.set_timer(DRAW, DRAW_REPEAT_TIME)
-    pygame.time.set_timer(UPDATE, UPDATE_REPEAT_TIME)
-    pygame.time.set_timer(MOVE_GHOST, MOVE_GHOST_TIME)
-    event_loop(game)
+    mr = MazeRun()
+    mr.create_display()
+    mr.create_tiles()
+    mr.create_random_maze(size)
+    mr.create_sprites(size)
+    mr.start_game()
+    #mr.load_level(LEVEL_FILE)

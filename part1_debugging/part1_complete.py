@@ -37,7 +37,7 @@ def get_tile_rect(x, y):
 
 def load_tiles():
     """Returns a tuple of (image, tile_dict)"""
-    tile_image = image.load('images/tiles.xpm')
+    tile_image = image.load('../images/tiles.xpm')
     tiles = {}
     for symbol, x, y in TILE_POSITIONS:
         tiles[symbol] = get_tile_rect(x, y)

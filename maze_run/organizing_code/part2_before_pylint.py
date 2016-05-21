@@ -1,4 +1,6 @@
 
+# TODO: fix and check all command-line arguments
+
 from util import debug_print
 from pygame import image, Rect, Surface
 from pygame.locals import KEYDOWN, KEYUP, USEREVENT
@@ -51,7 +53,7 @@ DIRECTIONS = {
 KEY_REPEAT_TIME = 250
 DRAW_REPEAT_TIME = 100
 UPDATE_REPEAT_TIME = 20
-MOVE_GHOST_TIME = 500
+MOVE_GHOST_TIME = 250
 
 KEY_REPEATED, DRAW, UPDATE, MOVE_GHOST, EXIT = range(USEREVENT + 1, USEREVENT + 6)
 # ------------- LOADING TILES -----------
@@ -239,6 +241,8 @@ class Player(Sprite):
             self.move(direction)
 
 
+
+
 # ------------- EVENT LOOP --------------
 
 def event_loop(callbacks, delay=10, repeat=KEY_REPEAT_TIME):
@@ -318,31 +322,6 @@ class MazeRun:
         self.player.animate()
         self.ghost.animate()
 
-    def replay(self, replay_filename):
-        import time
-        log.handlers.pop()
-
-        logdata = open('mymoves.log').read()
-        parts = logdata.split("----------------")
-        maze = TileGrid(parts[0].split('random level created')[-1].strip())
-
-        display = create_display()
-        sprites = create_sprites(Position(maze.xsize, maze.ysize))
-
-        tile_img = image.load(TILE_IMAGE_FILE)
-        tiles = load_tiles(TILE_POSITION_FILE)
-
-        moves = parts[1].strip().split('\n')
-        for m in moves:
-            tokens = m.split()
-            actor = tokens[0]
-            direction = tokens[-1].split('/')
-            direction = Position(int(direction[0]), int(direction[1]))
-            move(maze, direction, actor)
-            draw()
-            pygame.display.update()
-            time.sleep(0.5)
-            
     def start_game(self):
         callbacks = {
             KEYDOWN: self.handle_key,
@@ -356,8 +335,6 @@ class MazeRun:
         event_loop(callbacks)
 
 
-# TODO: fix and check all command-line arguments
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Start the MazeRun game.')
     parser.add_argument('--x', type=int, default=12,
@@ -367,31 +344,32 @@ if __name__ == '__main__':
     parser.add_argument('--ghost', 
                    #dest="MOVE_GHOST_TIME", action="store_const",
                    type=int, default=500,
-                   help='ghost speed (milliseconds per move)')
-    parser.add_argument('-f', '--fast', 
-                   dest="MOVE_GHOST_TIME", action="store_const",
-                   const=250,
-                   help='ghost speed (milliseconds per move)')
-
-    g = parser.add_mutually_exclusive_group()
-    g.add_argument('-l', '--load', type=str, default=None,
+                   help='ghost speed (moves every .. milliseconds)')
+    parser.add_argument('--load', type=str, default=None,
                    help='load maze from text file')
-    g.add_argument('-r', '--replay', nargs='?', type=argparse.FileType('r'),
-                   default=None,
+    parser.add_argument('--replay', type=str, default=None,
                    help='log file to replay from')
-
-    parser.add_argument('-e', '--eventlog', nargs='?', type=argparse.FileType('w'),
-                   default=sys.stdout,
-                   help="log file to store events")
     parser.add_argument('-v', '--verbose', action="store_true",
-                   # type=int,
-                   #choices=[0, 1, 2],
-                   help='set debugging level')
-    parser.add_argument('-playlist', type=str, metavar='.mp3', nargs='+',
-                   help='mp3 filename(s) to be played')
+                   help='print debugging information')
+    #parser.add_argument('words', type=str, nargs='+',
+    #               help='the word for which characters are counted')
+    #parser.add_argument("-v", "--verbosity", type=int, choices=[0, 1, 2],
+    # positional arguments: without dashes
+    # optional: with --
+    # g = parser.add_mutually_exclusive_group()
+    # g.add_argument(...)
+    # g.add_argument(...)
+    # -d delay=50 game speed
+    # -g ghost speed
+    # -x, -y size of the grid
+    # -r replay from logfile
+    # -l load level from file
+
+    # optional arguments
+    # --verbose
+    # --help info
 
     args = parser.parse_args()
-    print(args)
     size = Position(args.x, args.y)
 
     mr = MazeRun()

@@ -1,2 +1,4 @@
 *.pyc
 pygame/*
+*.log
+

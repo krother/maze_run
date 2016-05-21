@@ -141,7 +141,9 @@ def move(level, direction):
 
 def game(key):
     """Handles key events in the game"""
-    move(maze, DIRECTIONS.get(key, 0))
+    direction = DIRECTIONS.get(key)
+    if direction:
+        move(maze, direction)
     img = draw_grid(maze, tile_img, tiles)
     display.blit(img, Rect((0, 0, 384, 224)), Rect((0, 0, 384, 224)))
     pygame.display.update()

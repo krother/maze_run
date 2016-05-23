@@ -1,11 +1,7 @@
 
 # Code for chapter 04 - Debugging with the Scientific Method
 
-# WITH BUGS!
-# This code contains a single defect 
-# that is hard to find by looking at the symptoms or the code.
-#
-# The program should print codes of pressed keys. 
+# The program prints the codes of pressed keys. 
 
 from pygame.locals import KEYDOWN
 import pygame

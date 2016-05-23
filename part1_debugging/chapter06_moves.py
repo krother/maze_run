@@ -1,15 +1,19 @@
 
-from generate_maze import create_maze
-from load_tiles import load_tiles
-from draw_map import draw_grid, parse_grid
+# Code for chapter 06 - Introspection
+
+from chapter02_load_tiles import load_tiles
+from chapter03_generate_maze import create_maze
+from chapter05_draw_maze import draw_grid, parse_grid
 from pygame import image
-import sys
 import random
+import sys
+
 
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 UP = (0, -1)
 DOWN = (0, 1)
+
 
 def get_player_pos(level, player_char='*'):
     """Returns a (x, y) tuple of player char on the level"""
@@ -33,7 +37,7 @@ def move(level, direction):
 
 if __name__ == '__main__':
     tile_img, tiles = load_tiles()
-    maze =create_maze(12, 7)
+    maze = create_maze(12, 7)
     maze = parse_grid(maze)
     maze[1][1] = '*'
     for i in range(100):

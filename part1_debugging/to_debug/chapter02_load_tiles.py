@@ -11,9 +11,8 @@ from pygame import imagge, Rect
 
 TILE_POSITIONS = [
     ('#', 0, 0), # wall
-    (' ', 0, 1), # floor
-    ('.', 2, 0)  # dot
-    ('*', 3, 0), # player
+    (' ', 0, 1) # floor
+    ('.', 2, 0), # dot
 
 SIZE = 32
 

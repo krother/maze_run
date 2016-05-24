@@ -1,4 +1,6 @@
 
+from pygame.locals import USEREVENT
+from itertools import count
 from pprint import pprint
 import sys
 
@@ -9,3 +11,7 @@ def debug_print(*args, **kwargs):
     if DEBUG and condition:
         for a in args:
             pprint(a)
+
+
+# unique Pygame user event numbers
+user_events = count(USEREVENT)

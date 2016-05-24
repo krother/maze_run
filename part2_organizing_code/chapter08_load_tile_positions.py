@@ -1,7 +1,7 @@
 
-# Chapter 08 - 
+# Chapter 08 - Organizing code
 
-# cleaned code for loading tiles
+# Cleaned code for loading tiles
 
 import csv
 import os

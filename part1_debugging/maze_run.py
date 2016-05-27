@@ -1,11 +1,11 @@
 
 # Code for chapter 07 - Interactive Debugger
 
-from chapter02_load_tiles import load_tiles
-from chapter03_generate_maze import create_maze
-from chapter04_event_loop import event_loop
-from chapter05_draw_maze import draw_grid, parse_grid
-from chapter06_moves import move, LEFT, RIGHT, UP, DOWN
+from load_tiles import load_tiles
+from generate_maze import create_maze
+from event_loop import event_loop
+from draw_maze import draw_grid, parse_grid
+from moves import move, LEFT, RIGHT, UP, DOWN
 from pygame import Rect
 import pygame
 

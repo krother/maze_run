@@ -1,9 +1,9 @@
 
 # Code for chapter 06 - Introspection
 
-from chapter02_load_tiles import load_tiles
-from chapter03_generate_maze import create_maze
-from chapter05_draw_maze import draw_grid, parse_grid
+from load_tiles import load_tiles
+from generate_maze import create_maze
+from draw_maze import draw_grid, parse_grid
 from pygame import image
 import random
 import sys

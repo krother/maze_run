@@ -13,5 +13,14 @@ def debug_print(*args, **kwargs):
             pprint(a)
 
 
+
+def create_display(resolution):
+    """Initializes the Pygame window"""
+    pygame.init()
+    pygame.display.set_mode(resolution)
+    display = pygame.display.get_surface()
+    return display
+
+
 # unique Pygame user event numbers
 user_events = count(USEREVENT)

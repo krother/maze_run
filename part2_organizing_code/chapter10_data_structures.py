@@ -1,42 +1,33 @@
 
 """
-maze
-   char[][]
 
-player
-   x, y
-   tile
-   move_keys: dict
-
-ghost
-   x, y
-   tile
-
-game
-   display
 """
 
 import pygame
-from pygame import image
-from pygame.rect import Rect
+from pygame import image, Rect
 from pygame.locals import KEYDOWN
 from collections import namedtuple
-from part1 import UP, DOWN, LEFT, RIGHT
 from part1 import draw_grid
 from chapter08_load_tile_positions import load_tile_positions
 from chapter08_load_tile_positions import TILE_POSITION_FILE, TILE_IMAGE_FILE, SIZE
 from chapter09_event_loop_with_mediator import event_loop, exit_game
+from util import create_display
 
 
 Position = namedtuple('Position', ['x', 'y'])
 TileSet = namedtuple('TileSet', ['image', 'positions'])
+
+LEFT = Position(-1, 0)
+RIGHT = Position(1, 0)
+UP = Position(0, -1)
+DOWN = Position(0, 1)
 
 def get_tile_rect(position):
     """Converts tile indices to a pygame.Rect"""
     return Rect(position.x*SIZE, position.y*SIZE, SIZE, SIZE)
 
 
-maze = [
+maze = [ # convert to nested list.
     "#####",
     "#...#",
     "#..x#",
@@ -45,6 +36,7 @@ maze = [
 
 
 player = {
+    'maze': maze,
     'position': Position(1, 1),
     'tile': "*",
     'move_keys': {276: LEFT, 275: RIGHT,  273: UP, 274: DOWN}
@@ -73,20 +65,12 @@ def draw(maze, sprites, display, tiles):
     pygame.display.update()
 
 
-def create_display():
-    """Initializes the Pygame window"""
-    pygame.init()
-    pygame.display.set_mode((800, 600))
-    display = pygame.display.get_surface()
-    return display
-
-
 def wait_for_key(event):
     exit_game()
 
 
 if __name__ == '__main__':
-    display = create_display()
+    display = create_display((800, 600))
     tile_image = image.load(TILE_IMAGE_FILE)
     tile_positions = load_tile_positions(TILE_POSITION_FILE)
     tiles = TileSet(tile_image, tile_positions)

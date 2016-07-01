@@ -1,5 +1,13 @@
+"""
+Random Maze Generator
 
-# Code for chapter 03 - Semantic Errors
+Creates X*Y grids consisting of walls (#) and floor tiles (.), 
+so that the floor tiles are connected.
+
+Warning: Sometimes, the algorithm will create enclosed spaces.
+
+This module was introduced in chapter 03 - Semantic Errors
+"""
 
 import random
 

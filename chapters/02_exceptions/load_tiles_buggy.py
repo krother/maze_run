@@ -10,9 +10,9 @@ from pygame import imagge, Rect
 
 
 TILE_POSITIONS = [
-    ('#', 0, 0), # wall
-    (' ', 0, 1) # floor
-    ('.', 2, 0), # dot
+    ('#', 0, 0),  # wall
+    (' ', 0, 1)   # floor
+    ('.', 2, 0),  # dot
 
 SIZE = 32
 
@@ -40,8 +40,14 @@ if __name__ == '__main__':
     m.blit(tile_img, get_tile_rect(2, 0), tiles['*'])
     image.save(m, 'tile_combo.png')
 
+
 # ----------------------------
-# Optional exercise: make the print statement work
+
+# Optional exercise:
+# make the print statement below work
+# by modifying the class
+# so that it prints the char attribute
+
 
 class Tile:
 

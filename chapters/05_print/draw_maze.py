@@ -1,7 +1,7 @@
 
 # Code for chapter 05 - Debugging with print
 
-from pygame import image, Rect, Surface
+from pygame import image, Surface
 from load_tiles import load_tiles, get_tile_rect, SIZE
 from generate_maze import create_maze
 from util import debug_print

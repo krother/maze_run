@@ -1,6 +1,8 @@
 
 # Code for chapter 07 - Interactive Debugger
 
+# there is defect when integrating this module with the others
+
 from load_tiles import load_tiles
 from generate_maze import create_maze
 from event_loop import event_loop
@@ -15,6 +17,7 @@ DIRECTIONS = {
     273: UP, 274: DOWN
 }
 
+
 def draw():
     """Displays the maze on the screen"""
     img = draw_grid(maze, tile_img, tiles)
@@ -24,9 +27,7 @@ def draw():
 
 def handle_key(key):
     """Handles key events in the game"""
-    direction = DIRECTIONS.get(key)
-    if direction:
-        move(maze, direction)
+    move(maze, DIRECTIONS.get(key))
     draw()
 
 
@@ -36,7 +37,7 @@ if __name__ == '__main__':
     pygame.display.set_mode((800, 600))
     display = pygame.display.get_surface()
     tile_img, tiles = load_tiles()
-    
+
     # prepare the maze
     maze = parse_grid(create_maze(12, 7))
     maze[1][1] = '*'

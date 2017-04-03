@@ -5,8 +5,8 @@
 # This code contains two defects.
 
 from pygame import image, Surface
-from chapter02_load_tiles import load_tiles, get_tile_rect, SIZE
-from chapter03_generate_maze import create_maze
+from load_tiles import load_tiles, get_tile_rect, SIZE
+from generate_maze import create_maze
 
 
 def parse_grid(data):

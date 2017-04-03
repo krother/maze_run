@@ -23,7 +23,7 @@ def load_tiles():
     Load tiles from an image file into a dictionary.
     Returns a tuple of (image, tile_dict)
     """
-    tile_image = image.load('../../images/tiles.xpm')
+    tile_image = image.load('../images/tiles.xpm')
     tiles = {}
     for symbol, x, y in TILE_POSITIONS:
         tiles[symbol] = get_tile_rect(x, y)

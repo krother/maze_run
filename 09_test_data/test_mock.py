@@ -8,7 +8,7 @@ pygame.display.set_mode((800, 600))
 
 
 def draw(surface):
-    img = image.load('../../images/tiles.xpm')
+    img = image.load('../images/tiles.xpm')
     surface.blit(img, Rect((0, 0, 32, 32)), Rect((0, 0, 32, 32)))
     pygame.display.update()
 

@@ -1,9 +1,10 @@
 
+# Code for chapter 02 - Exceptions in Python
+
 from pygame import image, Rect, Surface
 
 TILE_POSITIONS = [
     ('#', 0, 0),  # wall
-    ('o', 1, 0),  # crate
     (' ', 0, 1),  # floor
     ('x', 1, 1),  # exit
     ('.', 2, 0),  # dot
@@ -18,8 +19,11 @@ def get_tile_rect(x, y):
 
 
 def load_tiles():
-    """Load tiles and returns a tuple of (image, tile_dict) """
-    tile_image = image.load('../../images/tiles.xpm')
+    """
+    Load tiles from an image file into a dictionary.
+    Returns a tuple of (image, tile_dict)
+    """
+    tile_image = image.load('../images/tiles.xpm')
     tiles = {}
     for symbol, x, y in TILE_POSITIONS:
         tiles[symbol] = get_tile_rect(x, y)
